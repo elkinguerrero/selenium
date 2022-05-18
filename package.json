@@ -1,0 +1,17 @@
+{
+  "name": "glocation-rta",
+  "version": "1.0.0",
+  "description": "software de pruebas",
+  "main": "service.js",
+  "scripts": {
+    "start": "node service.js"
+  },
+  "author": "Elkin Guerrero",
+  "license": "ISC",
+  "dependencies": {
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1",
+    "express": "^4.18.1",
+    "selenium-webdriver": "^4.1.2"
+  }
+}
