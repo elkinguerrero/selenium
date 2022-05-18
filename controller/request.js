@@ -116,10 +116,17 @@ router.post('/test', async (req, res) => {
                 setTimeout(function(){
                     driver.takeScreenshot().then(function(data){
                         var base64Data = data.replace(/^data:image\/png;base64,/,"")
-                        fs.writeFile(`img/${codigo_unico}.png`, base64Data, 'base64', function(err) {
-                            if(err) console.log(err);
-                            else resolve(1);
+                        result_final.push({
+                            "id": codigo_unico,
+                            "id_test":id_test,
+                            "action": `${btoa( `{ "vars": ${vars}, "action":${action}, "time":${time} },`)}`,
+                            "response": "ok",
+                            "details": "",
+                            "image": btoa(base64Data),
+                            "registration_date": req.body.fecha,
+                            "status": "1",
                         });
+                        resolve(1);
                     });
                 }, time);
             }
