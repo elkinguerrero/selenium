@@ -11,7 +11,7 @@ router.post('/test', async (req, res) => {
     var result_final = [];
     var intent_petition = 0;
 
-    const service = new chrome.ServiceBuilder('selenium/chromedriver_linux64/chromedriver');
+    const service = new chrome.ServiceBuilder('chromedriver/chromedriver');
     const driver = new Builder().forBrowser('chrome').setChromeService(service).build();
 
     const webdriver = require('selenium-webdriver'),
