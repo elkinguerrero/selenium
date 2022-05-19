@@ -4,7 +4,8 @@
   "description": "software de pruebas",
   "main": "service.js",
   "scripts": {
-    "start": "node service.js"
+    "start": "node service.js",
+    "build": "nexe service.js"
   },
   "author": "Elkin Guerrero",
   "license": "ISC",
@@ -13,6 +14,7 @@
     "btoa": "^1.2.1",
     "cors": "^2.8.5",
     "express": "^4.18.1",
+    "pkg": "^5.7.0",
     "selenium-webdriver": "^4.1.2"
   }
 }
