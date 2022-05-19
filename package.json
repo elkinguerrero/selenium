@@ -4,8 +4,7 @@
   "description": "software de pruebas",
   "main": "service.js",
   "scripts": {
-    "start": "node service.js",
-    "build": "nexe service.js"
+    "start": "node service.js"
   },
   "author": "Elkin Guerrero",
   "license": "ISC",

@@ -20,16 +20,12 @@ router.post('/test', async (req, res) => {
 
     var arr_query = [];
     var s_clase = [];
-    var codigo_unico = '';
-    var cont_img = 0;
 
     f_test(JSON.parse(atob(req.body.json_test)));
 
     function f_test(actions){
         arr_query = [];
         s_clase = [];
-        cont_img = 0;
-        codigo_unico = Math.random().toString(30).slice(-15).replace(/[.]/g,"_")
     
         driver.get(req.body.url).then(async function () {
             for( var i=0; i<actions.length; i++ ){
@@ -39,10 +35,10 @@ router.post('/test', async (req, res) => {
                 }
             }
     
-            console.log(`Fin de ejecución de query ${codigo_unico}`)
+            console.log(`Fin de ejecución de query ${id_test}`)
             setTimeout( function(){ 
                 // cierre de pruebas
-                console.log(`Cierre del proceso ${codigo_unico}`)
+                console.log(`Cierre del proceso ${id_test}`)
                 res.json(result_final)
                 driver.quit()
             } , 5000);
@@ -50,7 +46,6 @@ router.post('/test', async (req, res) => {
     }
     
     function f_query( vars, action, time ) {
-        cont_img += 1;
         time = !isNaN(!time) && time != "" && time != undefined ? parseInt(time) : 1000 ;
     
         return new Promise(resolve => {
@@ -74,7 +69,8 @@ router.post('/test', async (req, res) => {
                             driver.takeScreenshot().then(function(data){
                                 var base64Data = data.replace(/^data:image\/png;base64,/,"")
                                 result_final.push({
-                                    "id": codigo_unico,
+                                    "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
+                                    "id_test_unique": codigo_unico,
                                     "id_test":id_test,
                                     "action": `${btoa( `{ "vars": ${vars}, "action":${action}, "time":${time} },`)}`,
                                     "response": "ok",
@@ -96,7 +92,8 @@ router.post('/test', async (req, res) => {
                         if( intent_petition > 10 ){
                             clearInterval(arr_query[s_clase.indexOf(vars.class)]);
                             result_final.push({
-                                "id": codigo_unico,
+                                "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
+                                "id_unique": codigo_unico,
                                 "id_test":id_test,
                                 "action": `${btoa( `{ "vars": ${vars}, "action":${action}, "time":${time} },`)}`,
                                 "response": `Failed`,
@@ -117,7 +114,8 @@ router.post('/test', async (req, res) => {
                     driver.takeScreenshot().then(function(data){
                         var base64Data = data.replace(/^data:image\/png;base64,/,"")
                         result_final.push({
-                            "id": codigo_unico,
+                            "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
+                            "id_unique": codigo_unico,
                             "id_test":id_test,
                             "action": `${btoa( `{ "vars": ${vars}, "action":${action}, "time":${time} },`)}`,
                             "response": "ok",

@@ -3,7 +3,7 @@ const server = express();
 const cors = require('cors');
 
 // settings
-server.set('port', process.env.PORT || 8082);
+server.set('port', process.env.PORT || 8081);
 
 server.use(express.json({limit: '50mb'}));
 
