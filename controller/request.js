@@ -31,7 +31,8 @@ router.post('/test', async (req, res) => {
             for( var i=0; i<actions.length; i++ ){
                 intent_petition = 0;
                 end_process = false;
-                console.log( actions[i] )
+                console.log( 
+                    actions[i] )
                 if( await f_query( actions[i].vars, actions[i].action, actions[i].time ) == 0 ){
                     i=actions.length;
                 }
@@ -61,6 +62,9 @@ router.post('/test', async (req, res) => {
                         setInterval(async function () {
                             if( !end_process ){
                                 await driver.findElement(object_class(vars.class)).then(async function (webElement) {
+                                    //Se hace uso de la funcion wait para comprobar que el elemento realmente existe
+                                    await driver.wait(until.elementLocated(By.css(vars.class)),30000);
+
                                     end_process = true;
                                     if( action == "c" )
                                         await driver.findElement(object_class(vars.class)).click()
@@ -88,15 +92,14 @@ router.post('/test', async (req, res) => {
                                     clearInterval(arr_query[s_clase.indexOf(vars.class)]);
                                     s_clase[s_clase.indexOf(vars.class)] = undefined;
                                 }, function (err) {
-                                    
                                     if( err.name == "NoSuchElementError" )
-                                        console.log( `No se encontro el elemento ${vars.class} se intentara buscarlo de nuevo` )
+                                        console.log( `---------------------------\nNo se encontro el elemento ${vars.class} se intentara buscarlo de nuevo` )
                                     else
-                                        console.log(err.name)
+                                        console.log(`---------------------------\n${err.name}`)
                                 });
         
                                 if( intent_petition > 10 ){
-                                    console.log( `class or id ${vars.class} not found` )
+                                    console.log( `---------------------------\nclass or id ${vars.class} not found` )
                                     end_process = true;
                                     clearInterval(arr_query[s_clase.indexOf(vars.class)]);
                                     result_final.push({
