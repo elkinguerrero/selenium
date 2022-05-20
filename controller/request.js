@@ -59,6 +59,7 @@ router.post('/test', async (req, res) => {
                 }else if( action != 'p' ){
                     arr_query.push(
                         setInterval(async function () {
+                            console.log("Ingreso")
                             if( !end_process ){
                                 await driver.findElement(object_class(vars.class)).then(async function (webElement) {
                                     end_process = true;
