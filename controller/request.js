@@ -48,7 +48,7 @@ router.post('/test', async (req, res) => {
     }
     
     function f_query( vars, action, time ) {
-        time = !isNaN(!time) && time != "" && time != undefined ? parseInt(time) : 1000 ;
+        time = !isNaN(!time) && time != "" && time != undefined ? parseInt(time) : 3000 ;
         return new Promise(resolve => {
             
                 if( vars != undefined && vars.class == 'alert_confirm' ){
