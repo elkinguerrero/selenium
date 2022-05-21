@@ -61,7 +61,6 @@ router.post('/test', async (req, res) => {
                         setInterval(async function () {
                             if( !end_process ){
                                 await driver.findElement(object_class(vars.class)).then(async function (webElement) {
-                                    console.log("Ingreso2")
                                     end_process = true;
                                     if( action == "c" )
                                         await driver.findElement(object_class(vars.class)).click()
@@ -70,7 +69,7 @@ router.post('/test', async (req, res) => {
                                         await driver.findElement(object_class(vars.class)).sendKeys(vars.text);
                                     }
             
-                                    driver.takeScreenshot().then(function(data){
+                                    await driver.takeScreenshot().then(function(data){
                                         var base64Data = data.replace(/^data:image\/png;base64,/,"")
                                         result_final.push({
                                             "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
@@ -89,11 +88,15 @@ router.post('/test', async (req, res) => {
                                     clearInterval(arr_query[s_clase.indexOf(vars.class)]);
                                     s_clase[s_clase.indexOf(vars.class)] = undefined;
                                 }, function (err) {
-                                    if( err.name != "NoSuchElementError" )
+                                    
+                                    if( err.name == "NoSuchElementError" )
+                                        console.log( `No se encontro el elemento ${vars.class} se intentara buscarlo de nuevo` )
+                                    else
                                         console.log(err.name)
                                 });
         
                                 if( intent_petition > 10 ){
+                                    console.log( `class or id ${vars.class} not found` )
                                     end_process = true;
                                     clearInterval(arr_query[s_clase.indexOf(vars.class)]);
                                     result_final.push({
