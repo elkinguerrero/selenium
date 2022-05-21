@@ -49,9 +49,8 @@ router.post('/test', async (req, res) => {
     }
     
     function f_query( vars, action, time ) {
-        time = !isNaN(!time) && time != "" && time != undefined ? parseInt(time) : 3000 ;
+        time = !isNaN(!time) && time != "" && time != undefined ? parseInt(time) : 0 ;
         return new Promise(resolve => {
-            
                 if( vars != undefined && vars.class == 'alert_confirm' ){
                     setTimeout(function(){
                         driver.switchTo().alert().accept();
@@ -59,12 +58,11 @@ router.post('/test', async (req, res) => {
                     }, time);
                 }else if( action != 'p' ){
                     arr_query.push(
-                        setInterval(async function () {
+                        async function () {
                             if( !end_process ){
+                                //Se hace uso de la funcion wait para comprobar que el elemento realmente existe
+                                await driver.wait(until.elementLocated(By.css(vars.class)),3000);
                                 await driver.findElement(object_class(vars.class)).then(async function (webElement) {
-                                    //Se hace uso de la funcion wait para comprobar que el elemento realmente existe
-                                    await driver.wait(until.elementLocated(By.css(vars.class)),30000);
-
                                     end_process = true;
                                     if( action == "c" )
                                         await driver.findElement(object_class(vars.class)).click()
@@ -88,20 +86,20 @@ router.post('/test', async (req, res) => {
                                         });
                                         resolve(1);
                                     });
-                                                            
-                                    clearInterval(arr_query[s_clase.indexOf(vars.class)]);
                                     s_clase[s_clase.indexOf(vars.class)] = undefined;
                                 }, function (err) {
-                                    if( err.name == "NoSuchElementError" )
+                                    if( err.name == "NoSuchElementError" ){
                                         console.log( `---------------------------\nNo se encontro el elemento ${vars.class} se intentara buscarlo de nuevo` )
-                                    else
+                                        arr_query[s_clase.indexOf(vars.class)]()
+                                    }else{
                                         console.log(`---------------------------\n${err.name}`)
+                                        arr_query[s_clase.indexOf(vars.class)]()
+                                    }
                                 });
         
                                 if( intent_petition > 10 ){
                                     console.log( `---------------------------\nclass or id ${vars.class} not found` )
                                     end_process = true;
-                                    clearInterval(arr_query[s_clase.indexOf(vars.class)]);
                                     result_final.push({
                                         "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
                                         "id_test_unique": codigo_unico,
@@ -119,10 +117,16 @@ router.post('/test', async (req, res) => {
                             }else{
                                 resolve(1);
                             }
-                        }, time)
+                        }
                     )
                 
                     s_clase.push(vars.class);
+                    async function run(){
+                        //Se pausa la aplicacion por un tiempo mientras por tiempo definido por el usuario
+                        await timeout(time);
+                        arr_query[s_clase.indexOf(vars.class)]()
+                    }
+                    run()
                 }else{
                     setTimeout(function(){
                         driver.takeScreenshot().then(function(data){
@@ -152,5 +156,9 @@ router.post('/test', async (req, res) => {
         return object_general_class;
     }
 });
+
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 module.exports = router;
