@@ -21,6 +21,7 @@ router.post('/test', async (req, res) => {
     var arr_query = [];
     var s_clase = [];
 
+
     f_test(JSON.parse(atob(req.body.json_test)));
 
     function f_test(actions){
@@ -31,9 +32,8 @@ router.post('/test', async (req, res) => {
             for( var i=0; i<actions.length; i++ ){
                 intent_petition = 0;
                 end_process = false;
-                console.log( 
-                    actions[i] )
-                if( await f_query( actions[i].vars, actions[i].action, actions[i].time ) == 0 ){
+                console.log( actions[i] )
+                if( await f_query( actions[i].vars, actions[i].action, actions[i].time, (i+1)) == 0 ){
                     i=actions.length;
                 }
             }
@@ -48,7 +48,7 @@ router.post('/test', async (req, res) => {
         });
     }
     
-    function f_query( vars, action, time ) {
+    function f_query( vars, action, time, cont_action ) {
         time = !isNaN(!time) && time != "" && time != undefined ? parseInt(time) : 0 ;
         return new Promise(resolve => {
                 if( vars != undefined && vars.class == 'alert_confirm' ){
@@ -57,44 +57,47 @@ router.post('/test', async (req, res) => {
                         resolve(1);
                     }, time);
                 }else if( action != 'p' ){
+                    s_clase.push(vars.class);
                     arr_query.push(
                         async function () {
                             if( !end_process ){
                                 //Se hace uso de la funcion wait para comprobar que el elemento realmente existe
-                                await driver.wait(until.elementLocated(By.css(vars.class)),3000);
-                                await driver.findElement(object_class(vars.class)).then(async function (webElement) {
-                                    end_process = true;
-                                    if( action == "c" )
-                                        await driver.findElement(object_class(vars.class)).click()
-                                    else if( action == "w" ){
-                                        await driver.findElement(object_class(vars.class)).clear();
-                                        await driver.findElement(object_class(vars.class)).sendKeys(vars.text);
-                                    }
-            
-                                    await driver.takeScreenshot().then(function(data){
-                                        var base64Data = data.replace(/^data:image\/png;base64,/,"")
-                                        result_final.push({
-                                            "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
-                                            "id_test_unique": codigo_unico,
-                                            "id_test":id_test,
-                                            "action": `${btoa( `{ "vars": ${JSON.stringify(vars)}, "action":${action}, "time":${time} },`)}`,
-                                            "response": "ok",
-                                            "details": "",
-                                            "image": btoa(base64Data),
-                                            "registration_date": req.body.fecha,
-                                            "status": "1",
+                                await driver.wait(until.elementLocated(By.css(vars.class)),3000).then(async function (webElement) {
+                                    await driver.findElement(object_class(vars.class)).then(async function (webElement) {
+                                        end_process = true;
+                                        if( action == "c" )
+                                            await driver.findElement(object_class(vars.class)).click()
+                                        else if( action == "w" ){
+                                            await driver.findElement(object_class(vars.class)).clear();
+                                            await driver.findElement(object_class(vars.class)).sendKeys(vars.text);
+                                        }
+                
+                                        await driver.takeScreenshot().then(function(data){
+                                            var base64Data = data.replace(/^data:image\/png;base64,/,"")
+                                            result_final.push({
+                                                "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
+                                                "id_test_unique": codigo_unico,
+                                                "id_test":id_test,
+                                                "action": `${btoa( `{ "vars": ${JSON.stringify(vars)}, "action":${action}, "time":${time} },`)}`,
+                                                "response": "ok",
+                                                "details": "",
+                                                "image": btoa(base64Data),
+                                                "registration_date": req.body.fecha,
+                                                "status": "1",
+                                                "id_num_test":cont_action,
+                                            });
+                                            resolve(1);
                                         });
-                                        resolve(1);
+                                        s_clase[s_clase.indexOf(vars.class)] = undefined;
+                                    }, function (err) {
+                                        if( err.name == "NoSuchElementError" ){
+                                            console.log( `---------------------------\nNo se encontro el elemento ${vars.class} se intentara buscarlo de nuevo` )
+                                        }else{
+                                            console.log(`---------------------------\n${err.name}`)
+                                        }
                                     });
-                                    s_clase[s_clase.indexOf(vars.class)] = undefined;
                                 }, function (err) {
-                                    if( err.name == "NoSuchElementError" ){
-                                        console.log( `---------------------------\nNo se encontro el elemento ${vars.class} se intentara buscarlo de nuevo` )
-                                        arr_query[s_clase.indexOf(vars.class)]()
-                                    }else{
-                                        console.log(`---------------------------\n${err.name}`)
-                                        arr_query[s_clase.indexOf(vars.class)]()
-                                    }
+                                    console.log( `---------------------------\nNo se encontro el elemento ${vars.class} se intentara buscarlo de nuevo` )
                                 });
         
                                 if( intent_petition > 10 ){
@@ -110,17 +113,19 @@ router.post('/test', async (req, res) => {
                                         "image": "",
                                         "registration_date": req.body.fecha,
                                         "status": "1",
+                                        "id_num_test":cont_action,
                                     });
                                     resolve(0);
+                                }else if( s_clase.indexOf(vars.class) != -1 ){
+                                    arr_query[s_clase.indexOf(vars.class)]()
+                                    intent_petition++;
                                 }
-                                intent_petition++;
                             }else{
                                 resolve(1);
                             }
                         }
                     )
                 
-                    s_clase.push(vars.class);
                     async function run(){
                         //Se pausa la aplicacion por un tiempo mientras por tiempo definido por el usuario
                         await timeout(time);
@@ -141,6 +146,7 @@ router.post('/test', async (req, res) => {
                                 "image": btoa(base64Data),
                                 "registration_date": req.body.fecha,
                                 "status": "1",
+                                "id_num_test":cont_action
                             });
                             resolve(1);
                         });
