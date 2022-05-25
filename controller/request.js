@@ -51,11 +51,79 @@ router.post('/test', async (req, res) => {
     function f_query( vars, action, time, cont_action ) {
         time = !isNaN(!time) && time != "" && time != undefined ? parseInt(time) : 0 ;
         return new Promise(resolve => {
-                if( vars != undefined && vars.class == 'alert_confirm' ){
-                    setTimeout(function(){
-                        driver.switchTo().alert().accept();
-                        resolve(1);
-                    }, time);
+                if( vars != undefined && (vars.class == 'alert_confirm' || vars.class == 'alert_deny') ){
+                    time = time<2000 ? 2000 : time ;
+                    s_clase.push(vars.class);
+                    arr_query.push(
+                        async function () {
+                            await timeout(time);
+
+                            details = "";
+                            if( !end_process ){                                
+                                driver.switchTo().alert().then(async function(e) {
+                                    details = await e.getText();
+                                    if( vars.class == 'alert_confirm' )
+                                        driver.switchTo().alert().accept();
+                                    else if( vars.class == 'alert_deny' )
+                                        driver.switchTo().alert().dismiss();
+
+                                        driver.switchTo().alert().dismiss();
+                                    
+                                    if( !end_process ){
+                                        end_process = true;
+
+                                        result_final.push({
+                                            "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
+                                            "id_test_unique": codigo_unico,
+                                            "id_test":id_test,
+                                            "action": `${btoa( `{ "vars": ${JSON.stringify(vars)}, "action":${action}, "time":${time} },`)}`,
+                                            "response": "ok",
+                                            "details": details,
+                                            "image": "",
+                                            "registration_date": req.body.fecha,
+                                            "status": "1",
+                                            "id_num_test":cont_action,
+                                        });
+                                        s_clase[s_clase.indexOf(vars.class)] = undefined;
+                                        resolve(1);
+                                        
+                                    }
+                                }, async function (err) {
+                                    if( !end_process )
+                                        console.log( `---------------------------\nNo se encontro el elemento ${vars.class} se intentara buscarlo de nuevo` )
+                                });
+        
+                                if( intent_petition > 9 ){
+                                    console.log( `---------------------------\nclass or id ${vars.class} not found` )
+                                    end_process = true;
+                                    result_final.push({
+                                        "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
+                                        "id_test_unique": codigo_unico,
+                                        "id_test":id_test,
+                                        "action": `${btoa( `{ "vars": ${JSON.stringify(vars)}, "action":${action}, "time":${time} },`)}`,
+                                        "response": `Failed`,
+                                        "details": `class or id ${vars.class} not found`,
+                                        "image": "",
+                                        "registration_date": req.body.fecha,
+                                        "status": "1",
+                                        "id_num_test":cont_action,
+                                    });
+                                    resolve(0);
+                                }else if( s_clase.indexOf(vars.class) != -1 ){
+                                    intent_petition++;
+                                    arr_query[s_clase.indexOf(vars.class)]()
+                                }
+                            }else{
+                                resolve(1);
+                            }
+                        }
+                    )
+                
+                    async function run(){
+                        //Se pausa la aplicacion por un tiempo mientras por tiempo definido por el usuario
+                        arr_query[s_clase.indexOf(vars.class)]()
+                    }
+                    run()
                 }else if( action != 'p' ){
                     s_clase.push(vars.class);
                     arr_query.push(
@@ -63,10 +131,16 @@ router.post('/test', async (req, res) => {
                             if( !end_process ){
                                 //Se hace uso de la funcion wait para comprobar que el elemento realmente existe
                                 await driver.wait(until.elementLocated(By.css(vars.class)),3000).then(async function (webElement) {
+                                    //Se busca el elemento esto es necesario por si la pagina cambia y el elemento no existe
                                     await driver.findElement(object_class(vars.class)).then(async function (webElement) {
                                         end_process = true;
+                                        details = "";
                                         if( action == "c" )
                                             await driver.findElement(object_class(vars.class)).click()
+                                        else if( action == "gt" )
+                                            details = await driver.findElement(object_class(vars.class)).getText();
+                                        else if( action == "gv" )
+                                            details = await driver.findElement(object_class(vars.class)).getAttribute("value");
                                         else if( action == "w" ){
                                             await driver.findElement(object_class(vars.class)).clear();
                                             await driver.findElement(object_class(vars.class)).sendKeys(vars.text);
@@ -80,7 +154,7 @@ router.post('/test', async (req, res) => {
                                                 "id_test":id_test,
                                                 "action": `${btoa( `{ "vars": ${JSON.stringify(vars)}, "action":${action}, "time":${time} },`)}`,
                                                 "response": "ok",
-                                                "details": "",
+                                                "details": details,
                                                 "image": btoa(base64Data),
                                                 "registration_date": req.body.fecha,
                                                 "status": "1",
@@ -117,8 +191,8 @@ router.post('/test', async (req, res) => {
                                     });
                                     resolve(0);
                                 }else if( s_clase.indexOf(vars.class) != -1 ){
-                                    arr_query[s_clase.indexOf(vars.class)]()
                                     intent_petition++;
+                                    arr_query[s_clase.indexOf(vars.class)]()
                                 }
                             }else{
                                 resolve(1);
