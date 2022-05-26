@@ -134,9 +134,11 @@ router.post('/test', async (req, res) => {
                                     await driver.findElement(object_class(actions.vars.class)).then(async function (webElement) {
                                         end_process = true;
                                         details = "";
-                                        if( actions.action == "c" )
+                                        if( actions.action == "c" ){
+                                            await driver.executeScript("arguments[0].scrollIntoView()", driver.findElement(object_class(actions.vars.class)));
+                                            await driver.sleep(300);
                                             await driver.findElement(object_class(actions.vars.class)).click()
-                                        else if( actions.action == "gt" )
+                                        }else if( actions.action == "gt" )
                                             details = await driver.findElement(object_class(actions.vars.class)).getText();
                                         else if( actions.action == "gv" )
                                             details = await driver.findElement(object_class(actions.vars.class)).getAttribute("value");
