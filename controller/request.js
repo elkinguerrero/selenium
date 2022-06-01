@@ -63,9 +63,9 @@ router.post('/test', async (req, res) => {
                             driver.switchTo().alert().then(async function(e) {
                                 details = await e.getText();
                                 if( actions.vars.class == 'alert_confirm' )
-                                    e.switchTo().alert().accept();
+                                    driver.switchTo().alert().accept();
                                 else if( actions.vars.class == 'alert_deny' )
-                                    e.switchTo().alert().dismiss();
+                                    driver.switchTo().alert().dismiss();
 
                                 if( !end_process ){
                                     end_process = true;
