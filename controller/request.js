@@ -51,7 +51,6 @@ router.post('/test', async (req, res) => {
     function f_query( actions ) {
         actions.time = !isNaN(!actions.time) && actions.time != "" && actions.time != undefined ? parseInt(actions.time) : 0 ;
         return new Promise(resolve => {
-            console.log(-2)
             if( actions.vars != undefined && (actions.vars.class == 'alert_confirm' || actions.vars.class == 'alert_deny') ){
                 actions.time = actions.time<2000 ? 2000 : actions.time ;
                 s_clase.push(actions.vars.class);
@@ -64,12 +63,10 @@ router.post('/test', async (req, res) => {
                             driver.switchTo().alert().then(async function(e) {
                                 details = await e.getText();
                                 if( actions.vars.class == 'alert_confirm' )
-                                    driver.switchTo().alert().accept();
+                                    e.switchTo().alert().accept();
                                 else if( actions.vars.class == 'alert_deny' )
-                                    driver.switchTo().alert().dismiss();
+                                    e.switchTo().alert().dismiss();
 
-                                    driver.switchTo().alert().dismiss();
-                                
                                 if( !end_process ){
                                     end_process = true;
 
