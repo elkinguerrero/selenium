@@ -24,10 +24,13 @@ router.post('/test', async (req, res) => {
 
     f_test(JSON.parse(atob(req.body.json_test)));
 
-    function f_test(actions){
+    async function f_test(actions){
         arr_query = [];
         s_clase = [];
-    
+
+        //Se agranda la pantalla
+        await driver.manage().window().maximize();
+
         driver.get(req.body.url).then(async function () {
             for( var i=0; i<actions.length; i++ ){
                 intent_petition = 0;
