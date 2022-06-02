@@ -148,11 +148,8 @@ router.post('/test', async (req, res) => {
                                         details = await driver.findElement(object_class(actions.vars.class)).getAttribute("value");
                                     } else if( actions.action == "w" ){
                                         await timeout(100);
-                                        console.log(1)
                                         await driver.findElement(object_class(actions.vars.class)).clear();
-                                        console.log(2)
                                         await driver.findElement(object_class(actions.vars.class)).sendKeys(actions.vars.text);
-                                        console.log(3)
                                         takephoto()
                                         await timeout(1000);
                                     }else if( actions.action == "f" ){
