@@ -150,6 +150,7 @@ router.post('/test', async (req, res) => {
                                         await driver.findElement(object_class(actions.vars.class)).clear();
                                         await driver.findElement(object_class(actions.vars.class)).sendKeys(actions.vars.text);
                                         takephoto()
+                                        await timeout(1000);
                                     }else if( actions.action == "f" ){
                                         takephoto()
                                         details = await driver.findElement(object_class(actions.vars.class)).getAttribute(actions.attribute);
