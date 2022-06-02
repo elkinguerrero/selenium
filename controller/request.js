@@ -10,7 +10,7 @@ router.post('/test', async (req, res) => {
     var id_test = req.body.id_1;
     var result_final = [];
     var intent_petition, end_process;
-
+    
     const service = new chrome.ServiceBuilder('chromedriver/chromedriver');
     const driver = new Builder().forBrowser('chrome').setChromeService(service).build();
 
@@ -130,41 +130,54 @@ router.post('/test', async (req, res) => {
                             //Se hace uso de la funcion wait para comprobar que el elemento realmente existe
                             await driver.wait(until.elementLocated(By.css(actions.vars.class)),3000).then(async function (webElement) {
                                 //Se busca el elemento esto es necesario por si la pagina cambia y el elemento no existe
-                                await driver.findElement(object_class(actions.vars.class)).then(async function (webElement) {
+                                await driver.findElement(object_class(actions.vars.class)).then(async function (element) {
                                     end_process = true;
                                     details = "";
+                                    let base64Data = '';
+
                                     if( actions.action == "c" ){
+                                        takephoto()
                                         await driver.executeScript("arguments[0].scrollIntoView()", driver.findElement(object_class(actions.vars.class)));
-                                        await driver.sleep(300);
+                                        await driver.sleep(1000);
                                         await driver.findElement(object_class(actions.vars.class)).click()
-                                    }else if( actions.action == "gt" )
+                                    } else if( actions.action == "gt" ){
+                                        takephoto()
                                         details = await driver.findElement(object_class(actions.vars.class)).getText();
-                                    else if( actions.action == "gv" )
+                                    } else if( actions.action == "gv" ){
+                                        takephoto()
                                         details = await driver.findElement(object_class(actions.vars.class)).getAttribute("value");
-                                    else if( actions.action == "w" ){
+                                    } else if( actions.action == "w" ){
                                         await driver.findElement(object_class(actions.vars.class)).clear();
                                         await driver.findElement(object_class(actions.vars.class)).sendKeys(actions.vars.text);
+                                        takephoto()
                                     }else if( actions.action == "f" ){
+                                        takephoto()
                                         details = await driver.findElement(object_class(actions.vars.class)).getAttribute(actions.attribute);
                                         details = `Coincidencias encontradas: ${details.split(actions.find).length-1}`;
                                     }
-            
-                                    await driver.takeScreenshot().then(function(data){
-                                        var base64Data = data.replace(/^data:image\/png;base64,/,"")
-                                        result_final.push({
-                                            "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
-                                            "id_test_unique": codigo_unico,
-                                            "id_test":id_test,
-                                            "action": `${btoa( JSON.stringify(actions) )}`,
-                                            "response": "ok",
-                                            "details": details,
-                                            "image": btoa(base64Data),
-                                            "registration_date": req.body.fecha,
-                                            "status": "1",
-                                        });
-                                        resolve(1);
+
+                                    result_final.push({
+                                        "id": Math.random().toString(30).slice(-15).replace(/[.]/g,"_"),
+                                        "id_test_unique": codigo_unico,
+                                        "id_test":id_test,
+                                        "action": `${btoa( JSON.stringify(actions) )}`,
+                                        "response": "ok",
+                                        "details": details,
+                                        "image": btoa(base64Data),
+                                        "registration_date": req.body.fecha,
+                                        "status": "1",
                                     });
+                                    
                                     s_clase[s_clase.indexOf(actions.vars.class)] = undefined;
+                                    resolve(1);
+                                    async function takephoto(){
+                                        //Se toma captura de panalla
+                                        await driver.takeScreenshot().then(function(data){
+                                            base64Data = data.replace(/^data:image\/png;base64,/,"")
+                                        }, function (err) {
+                                            console.log( `---------------------------\nNo se tomara captura de pantalla en elemento ${actions.vars.class}` )
+                                        });
+                                    }
                                 }, function (err) {
                                     if( err.name == "NoSuchElementError" ){
                                         console.log( `---------------------------\nNo se encontro el elemento ${actions.vars.class} se intentara buscarlo de nuevo` )
