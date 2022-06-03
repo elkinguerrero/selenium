@@ -129,32 +129,37 @@ router.post('/test', async (req, res) => {
                         if( !end_process ){
                             //Se hace uso de la funcion wait para comprobar que el elemento realmente existe
                             await driver.wait(until.elementLocated(By.css(actions.vars.class)),3000).then(async function (webElement) {
+                                const v_object_class = object_class(actions.vars.class);
+
                                 //Se busca el elemento esto es necesario por si la pagina cambia y el elemento no existe
-                                await driver.findElement(object_class(actions.vars.class)).then(async function (element) {
+                                await driver.findElement(v_object_class).then(async function (element) {
                                     end_process = true;
                                     details = "";
                                     let base64Data = '';
 
                                     if( actions.action == "c" ){
                                         takephoto()
-                                        await driver.executeScript("arguments[0].scrollIntoView()", driver.findElement(object_class(actions.vars.class)));
+                                        await driver.executeScript("arguments[0].scrollIntoView()", driver.findElement(v_object_class));
                                         await driver.sleep(1000);
-                                        await driver.findElement(object_class(actions.vars.class)).click()
-                                    } else if( actions.action == "gt" ){
+                                        await driver.findElement(v_object_class).click()
+                                    } else if( actions.action == "s" ){
                                         takephoto()
-                                        details = await driver.findElement(object_class(actions.vars.class)).getText();
+                                        details = await driver.findElement(v_object_class).sendKeys(actions.vars.text);
+                                    }  else if( actions.action == "gt" ){
+                                        takephoto()
+                                        details = await driver.findElement(v_object_class).getText();
                                     } else if( actions.action == "gv" ){
                                         takephoto()
-                                        details = await driver.findElement(object_class(actions.vars.class)).getAttribute("value");
+                                        details = await driver.findElement(v_object_class).getAttribute("value");
                                     } else if( actions.action == "w" ){
                                         await timeout(100);
-                                        await driver.findElement(object_class(actions.vars.class)).clear();
-                                        await driver.findElement(object_class(actions.vars.class)).sendKeys(actions.vars.text);
+                                        await driver.findElement(v_object_class).clear();
+                                        await driver.findElement(v_object_class).sendKeys(actions.vars.text);
                                         takephoto()
                                         await timeout(1000);
                                     }else if( actions.action == "f" ){
                                         takephoto()
-                                        details = await driver.findElement(object_class(actions.vars.class)).getAttribute(actions.attribute);
+                                        details = await driver.findElement(v_object_class).getAttribute(actions.attribute);
                                         details = `Coincidencias encontradas: ${details.split(actions.find).length-1}`;
                                     }
 
